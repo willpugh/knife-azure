@@ -11,10 +11,18 @@ Follow these steps to generate the certificate
 3. Decode the certificate file :
 
  base64 -d cert.pfx > cert_decoded.pfx
+ 
+ In Windows, you can decode and extract the PFX file using powershell or a free windows base 64 decoder such as http://www.fourmilab.ch/webtools/base64/base64.zip,
+
+ base64.exe -d cert.pfx -> cert_decoded.pfx
 
 4. Convert the decoded PFX file to a PEM file
 
  openssl pkcs12 -in cert_decoded.pfx -out managementCertificate.pem -nodes
+
+ In Windows use powershell,
+
+ openssl.exe pkcs12 -in cert_decoded.pfx -out managementCertificate.pem -nodes
 
 It is possible to generate your own certificates and upload them. More Detailed Documentation about the Management Certificates is available : https://www.windowsazure.com/en-us/manage/linux/common-tasks/manage-certificates/
 
