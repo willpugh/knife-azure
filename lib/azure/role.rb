@@ -126,6 +126,19 @@ class Azure
         end
       end
     end
+    def find_pem(name)
+      config_dir = Chef::Knife.chef_config_dir
+      if File.exist? name
+        pem_file = name
+      elsif config_dir && File.exist?(File.join(config_dir, name))
+        pem_file = File.join(config_dir, name)
+      elsif File.exist?(File.join(ENV['HOME'], '.chef', name))
+        pem_file = File.join(ENV['HOME'], '.chef', name)
+      else
+        raise 'Unable to find certificate pem file - ' + name
+      end
+      pem_file
+    end
     def setup(params)
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.PersistentVMRole(
@@ -143,7 +156,25 @@ class Azure
               xml.HostName params[:host_name] 
               xml.UserName params[:ssh_user]
               xml.UserPassword params[:ssh_password]
-              xml.DisableSshPasswordAuthentication 'false'
+              if params[:identity_file].empty?
+                xml.DisableSshPasswordAuthentication 'false'
+              else
+                xml.DisableSshPasswordAuthentication 'true'
+                xml.SSH {
+                   xml.PublicKeys {
+                    xml.PublicKey {
+                      xml.FingerPrint Digest::SHA1.hexdigest(File.read find_pem(params[:ssh_pub_key_file]))
+                      xml.Path "/home/mohit/.ssh/authorized_keys"
+                    }
+                  }
+                  xml.KeyPairs {
+                    xml.KeyPair {
+                      xml.FingerPrint Digest::SHA1.hexdigest(File.read find_pem(params[:ssh_private_key_file]))
+                      xml.Path "/home/mohit/.ssh/id_rsa"
+                    }
+                  }
+                }
+              end
               }
             elsif params[:os_type] == 'Windows'
               xml.ConfigurationSet('i:type' => 'WindowsProvisioningConfigurationSet') {

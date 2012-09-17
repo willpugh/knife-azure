@@ -429,6 +429,12 @@ class Chef
           server_def[:bootstrap_proto] = 'ssh'
           server_def[:ssh_user] = locate_config_value(:ssh_user)
           server_def[:ssh_password] = locate_config_value(:ssh_password)
+          if not locate_config_value(:identity_file).empty?
+            server_def[:identity_file] = locate_config_value(:identity_file)
+            server_def[:azure_mgmt_cert] = locate_config_value(:azure_mgmt_cert)
+            server_def[:ssh_pub_key_file] = locate_config_value(:ssh_pub_key_file)
+            server_def[:ssh_private_key_file] = locate_config_value(:ssh_private_key_file)
+          end
         end
         server_def
       end
