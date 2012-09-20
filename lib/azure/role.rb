@@ -156,24 +156,24 @@ class Azure
               xml.HostName params[:host_name] 
               xml.UserName params[:ssh_user]
               xml.UserPassword params[:ssh_password]
-              if params[:identity_file].empty?
-                xml.DisableSshPasswordAuthentication 'false'
-              else
+              if not (params[:identity_file].nil? && params[:identity_file].to_s.empty?)
                 xml.DisableSshPasswordAuthentication 'true'
                 xml.SSH {
                    xml.PublicKeys {
                     xml.PublicKey {
                       xml.FingerPrint Digest::SHA1.hexdigest(File.read find_pem(params[:ssh_pub_key_file]))
-                      xml.Path "/home/mohit/.ssh/authorized_keys"
+                      xml.Path '/home/mohit/.ssh/authorized_keys'
                     }
                   }
                   xml.KeyPairs {
                     xml.KeyPair {
-                      xml.FingerPrint Digest::SHA1.hexdigest(File.read find_pem(params[:ssh_private_key_file]))
-                      xml.Path "/home/mohit/.ssh/id_rsa"
+                      xml.FingerPrint Digest::SHA1.hexdigest(File.read find_pem(params[:ssh_pub_key_file]))
+                      xml.Path '/home/mohit/.ssh/id_rsa'
                     }
                   }
                 }
+              else 
+                xml.DisableSshPasswordAuthentication 'false'
               end
               }
             elsif params[:os_type] == 'Windows'
@@ -183,10 +183,8 @@ class Azure
               xml.AdminPassword params[:admin_password]
               xml.ResetPasswordOnFirstLogon 'false'
               xml.EnableAutomaticUpdates 'false'
-
               }
             end
-
           xml.ConfigurationSet('i:type' => 'NetworkConfigurationSet') {
             xml.ConfigurationSetType 'NetworkConfiguration'
             xml.InputEndpoints {

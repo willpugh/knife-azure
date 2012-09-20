@@ -45,7 +45,8 @@ class Chef
       option :bootstrap_protocol,
         :long => "--bootstrap-protocol protocol",
         :description => "Protocol to bootstrap windows servers. options: winrm/ssh",
-        :default => "winrm"
+        :default => "winrm",
+        :proc => Proc.new { |protocol| Chef::Config[:knife][:bootstrap_protocol] = protocol }
 
       option :chef_node_name,
         :short => "-N NAME",
@@ -254,7 +255,7 @@ class Chef
 
         Chef::Log.info("creating...")
       
-        Chef::Log.info("Using the #{locate_config_value(:bootstrap_protocol)} protocol for bootstrapping")
+        Chef::Log.info("Using the #{(Chef::Config[:knife][:bootstrap_protocol])} protocol for bootstrapping")
         if not locate_config_value(:hosted_service_name)
           config[:hosted_service_name] = [strip_non_ascii(locate_config_value(:role_name)), random_string].join
         end
@@ -338,6 +339,8 @@ class Chef
 
 
       def bootstrap_for_windows_node(server, fqdn)
+        puts "bootstrap_for_windows_node(server, fqdn) : #{server.inspect}, #{fqdn.inspect}"
+        puts "bootstrap_protocol: #{locate_config_value(:bootstrap_protocol).inspect}"
         if locate_config_value(:bootstrap_protocol) == 'winrm' 
             if is_platform_windows?
               require 'em-winrs'
@@ -429,7 +432,8 @@ class Chef
           server_def[:bootstrap_proto] = 'ssh'
           server_def[:ssh_user] = locate_config_value(:ssh_user)
           server_def[:ssh_password] = locate_config_value(:ssh_password)
-          if not locate_config_value(:identity_file).empty?
+          puts "identity_file: #{locate_config_value(:identify_file).inspect}"
+          unless locate_config_value(:identity_file).nil? || locate_config_value(:identity_file).empty?
             server_def[:identity_file] = locate_config_value(:identity_file)
             server_def[:azure_mgmt_cert] = locate_config_value(:azure_mgmt_cert)
             server_def[:ssh_pub_key_file] = locate_config_value(:ssh_pub_key_file)
