@@ -157,6 +157,16 @@ class Chef
         :long => "--udp-endpoints PORT_LIST",
         :description => "Comma separated list of UDP local and public ports to open i.e. '80:80,433:5000'"
 
+      option :virtual_network,
+         :short => "-w VIRTUAL_NETWORK",
+         :long => "--virtual-network-name VIRTUAL_NETWORK",
+         :description => "Name of the Virtual Network to use in Azure"
+
+      option :subnet_names,
+         :short => "-b SUB_NET_NAME",
+         :long => "--subnet-names SUB_NET_NAME",
+         :description => "Name of the subnet with-in this virtual network to use"
+
 
       def strip_non_ascii(string)
         string.gsub(/[^0-9a-z ]/i, '')
@@ -417,8 +427,11 @@ class Chef
           :role_size => locate_config_value(:role_size),
           :tcp_endpoints => locate_config_value(:tcp_endpoints),
           :udp_endpoints => locate_config_value(:udp_endpoints),
-          :bootstrap_proto => locate_config_value(:bootstrap_protocol)
+          :bootstrap_proto => locate_config_value(:bootstrap_protocol),
+          :virtual_network => locate_config_value(:virtual_network),
+          :subnet_names => locate_config_value(:subnet_names)
         }
+
 
         if is_image_windows?
           server_def[:os_type] = 'Windows'

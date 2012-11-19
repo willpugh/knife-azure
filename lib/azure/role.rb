@@ -127,6 +127,8 @@ class Azure
       end
     end
     def setup(params)
+      puts params
+
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.PersistentVMRole(
           'xmlns'=>'http://schemas.microsoft.com/windowsazure',
@@ -205,6 +207,17 @@ class Azure
                 }
               end
             end
+
+            #if params[:virtual_network]
+            #
+            #  if params[:subnet_names]
+            #    xml.SubnetNames = params[:subnet_names]
+            #  end
+            #end
+
+            if params[:subnet_names]
+              xml.SubnetNames params[:subnet_names]
+            end
             }
           }
           }
@@ -214,6 +227,7 @@ class Azure
             xml.SourceImageName params[:source_image]
           }
           xml.RoleSize params[:role_size]
+          print xml.to_xml
         }
       end 
       builder.doc
