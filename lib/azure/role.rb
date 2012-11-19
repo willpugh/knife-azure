@@ -161,12 +161,17 @@ class Azure
           xml.ConfigurationSet('i:type' => 'NetworkConfigurationSet') {
             xml.ConfigurationSetType 'NetworkConfiguration'
             xml.InputEndpoints {
+
+              ssh_included = false
+              winrm_included = false
+
               if params[:bootstrap_proto].downcase == 'ssh'
                 xml.InputEndpoint {
                 xml.LocalPort '22' 
                 xml.Name 'SSH'
                 xml.Port '22'
                 xml.Protocol 'TCP'
+                ssh_included = true
               }
               elsif params[:bootstrap_proto].downcase == 'winrm' and params[:os_type] == 'Windows'
                 xml.InputEndpoint {
@@ -174,12 +179,17 @@ class Azure
                   xml.Name 'WinRM'
                   xml.Port '5985'
                   xml.Protocol 'TCP'
+                  winrm_included = true
                 }
               end
  
             if params[:tcp_endpoints]
               params[:tcp_endpoints].split(',').each do |endpoint|
                 ports = endpoint.split(':')
+                if ssh_included and (ports[0]==22 or ports[1]==22)
+                  print "ssh collision"
+                end
+
                 xml.InputEndpoint {
                   xml.LocalPort ports[0]
                   xml.Name 'tcpport_' + ports[0] + '_' + params[:host_name]
@@ -232,6 +242,7 @@ class Azure
       end 
       builder.doc
     end
+
     def create(params, roleXML)
       servicecall = "hostedservices/#{params[:hosted_service_name]}/deployments" +
       "/#{params['deploy_name']}/roles"
