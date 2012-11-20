@@ -127,8 +127,6 @@ class Azure
       end
     end
     def setup(params)
-      puts params
-
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.PersistentVMRole(
           'xmlns'=>'http://schemas.microsoft.com/windowsazure',
@@ -154,7 +152,6 @@ class Azure
               xml.AdminPassword params[:admin_password]
               xml.ResetPasswordOnFirstLogon 'false'
               xml.EnableAutomaticUpdates 'false'
-
               }
             end
 
@@ -182,26 +179,34 @@ class Azure
                   winrm_included = true
                 }
               end
- 
+
+
             if params[:tcp_endpoints]
               params[:tcp_endpoints].split(',').each do |endpoint|
-                ports = endpoint.split(':')
-                if ssh_included and (ports[0]==22 or ports[1]==22)
-                  print "ssh collision"
-                end
 
-                xml.InputEndpoint {
-                  xml.LocalPort ports[0]
-                  xml.Name 'tcpport_' + ports[0] + '_' + params[:host_name]
-                  if ports.length > 1
-                    xml.Port ports[1]
-                  else
-                    xml.Port ports[0]
-                  end 
-                  xml.Protocol 'TCP'
-                }
+                ports = endpoint.split(':')
+
+                if ssh_included &&
+                    (ports[0]=='22' || (ports.length > 1 && ports[1]=='22'))
+                  #SSH already added, don't do anything'
+                elsif winrm_included &&
+                    (ports[0]=='5985' || (ports.length > 1 && ports[1]=='5985'))
+                  #SSH already added, don't do anything'
+                else
+                  xml.InputEndpoint {
+                    xml.LocalPort ports[0]
+                    xml.Name 'tcpport_' + ports[0] + '_' + params[:host_name]
+                    if ports.length > 1
+                      xml.Port ports[1]
+                    else
+                      xml.Port ports[0]
+                    end
+                    xml.Protocol 'TCP'
+                  }
+                end
               end
             end
+
             if params[:udp_endpoints]
               params[:udp_endpoints].split(',').each do |endpoint|
                 ports = endpoint.split(':')
@@ -220,12 +225,6 @@ class Azure
 
 
             }
-            #if params[:virtual_network]
-            #
-            #  if params[:subnet_names]
-            #    xml.SubnetNames = params[:subnet_names]
-            #  end
-            #end
 
             if params[:subnet_names]
               xml.SubnetNames {
@@ -240,7 +239,6 @@ class Azure
             xml.SourceImageName params[:source_image]
           }
           xml.RoleSize params[:role_size]
-          print xml.to_xml
         }
       end 
       builder.doc
