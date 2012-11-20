@@ -167,6 +167,11 @@ class Chef
          :long => "--subnet-names SUB_NET_NAME",
          :description => "Name of the subnet with-in this virtual network to use"
 
+      option :affinity_group,
+         :short => "-a AFFINITY_GROUP",
+         :long => "--affinity-group AFFINITY_GROUP",
+         :description => "Name of the affinity group to put this VM in."
+
 
       def strip_non_ascii(string)
         string.gsub(/[^0-9a-z ]/i, '')
@@ -429,7 +434,8 @@ class Chef
           :udp_endpoints => locate_config_value(:udp_endpoints),
           :bootstrap_proto => locate_config_value(:bootstrap_protocol),
           :virtual_network => locate_config_value(:virtual_network),
-          :subnet_names => locate_config_value(:subnet_names)
+          :subnet_names => locate_config_value(:subnet_names),
+          :affinity_group => locate_config_value(:affinity_group)
         }
 
 

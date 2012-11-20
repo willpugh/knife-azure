@@ -218,6 +218,8 @@ class Azure
               end
             end
 
+
+            }
             #if params[:virtual_network]
             #
             #  if params[:subnet_names]
@@ -226,9 +228,10 @@ class Azure
             #end
 
             if params[:subnet_names]
-              xml.SubnetNames params[:subnet_names]
+              xml.SubnetNames {
+                xml.SubnetName params[:subnet_names]
+              }
             end
-            }
           }
           }
           xml.Label Base64.encode64(params[:role_name]).strip

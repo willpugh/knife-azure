@@ -79,6 +79,10 @@ class Azure
           xml.Label Base64.encode64(params[:hosted_service_name])
           xml.Description params[:hosted_service_description] || 'Explicitly created hosted service'
           xml.Location params[:service_location] || 'West US'
+
+          if params[:affinity_group]
+            xml.AffinityGroup params[:affinity_group]
+          end
         }
       end
       @connection.query_azure("hostedservices", "post", builder.to_xml)
